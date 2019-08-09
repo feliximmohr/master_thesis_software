@@ -10,7 +10,7 @@ stimulus_len = 1;
 set = 'exp1';
 
 % Define paths
-export_path = fullfile('generated',set,'earSignals');
+export_path = fullfile('../generated',set,'earSignals');
 dataset_path = fullfile(fileparts(mfilename('fullpath')),'data_set',set);
 ir_path = fullfile(dataset_path,'brs');
 stimuli_path = fullfile(dataset_path,'stimuli');

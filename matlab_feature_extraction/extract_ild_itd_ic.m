@@ -42,7 +42,7 @@ par = genParStruct('fb_type',fb_type,'fb_lowFreqHz',fb_lowFreqHz,...
 % Data set name
 set = 'exp1';
 
-earSignal_path = fullfile(fileparts(mfilename('fullpath')),'generated', set, 'earSignals');
+earSignal_path = fullfile(fileparts(mfilename('fullpath')),'../generated', set, 'earSignals');
 export_path = fullfile(earSignal_path,'..', 'features' );
 
 % Create folder if inexistent
