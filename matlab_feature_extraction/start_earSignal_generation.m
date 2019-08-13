@@ -8,10 +8,14 @@ clc
 
 %% Set paths and files
 % Data set directory
-dataset_dir = {'../data_set/exp1/',...
-               '../data_set/exp2/'};
+dataset_dir = {'../data_set/exp1',...
+               '../data_set/exp2'};
+           
 % Directory to export files to
-export_dir = fullfile(dataset_dir, 'earSignals');
+%export_dir = fullfile(dataset_dir, 'features');
+export_dir = {'../generated/exp1/earSignals',...
+              '../generated/exp2/earSignals'};
+          
 % Stimulus signal file
 stimulus_file = '../generated/wn.mat';
 % Stimulus length to use in seconds
@@ -19,5 +23,5 @@ stimulus_len = 1;
 
 %% Compute and save
 for i=1:length(dataset_dir)
-    gen_earSignals(dataset_dir{i},export_dir{i},stimulus_file,stimulus_len)
+    generate_earSignals(dataset_dir{i},export_dir{i},stimulus_file,stimulus_len);
 end

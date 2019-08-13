@@ -1,9 +1,9 @@
-function gen_earSignals(dataset_dir,export_dir,stimulus_file,stimulus_len)
+function generate_earSignals(dataset_dir,export_dir,stimulus_file,stimulus_len)
 %GEN_EARSIGNALS generates binaural ear signals for head rotation angle by
 % convolving a stimulus signal with binaural room impulse responses.
 %   #TODO: extended documentation
 %
-%   Usage: gen_earSignals(dataset_dir,export_dir,stimulus_file)
+%   Usage: generate_earSignals(dataset_dir,export_dir,stimulus_file)
 %
 %   Input parameters:
 %       dataset_dir     - path to data set directory
@@ -19,7 +19,7 @@ function gen_earSignals(dataset_dir,export_dir,stimulus_file,stimulus_len)
 ir_dir = fullfile(dataset_dir,'brs');
 stimuli_dir = fullfile(dataset_dir,'stimuli');
 dataset_name = strsplit(dataset_dir, '/');
-dataset_name = dataset_name{end-1};
+dataset_name = dataset_name{end};
 
 % Create folder if inexistent
 if ~exist(export_dir,'dir'); mkdir(export_dir); end
@@ -31,7 +31,7 @@ ir_files = ir_files(file_flags);
 num = 1:length(ir_files);
 % Restruct filenames to common standard
 [filelist{num}]=deal(ir_files.name);
-filelist = reformat_filename(filelist,dataset_name,'ild_itd_ic');
+filelist = reformat_filename(filelist,dataset_name,'earSignals');
 
 % Define stimulus file in case not specified as input argument
 if nargin < 3
@@ -50,7 +50,7 @@ if strcmp(stimulus_file_ext,'wav')
     stimulus = stimulus(1:stimulus_len*fs);
 else
     try
-        load(stimulus_file,'stimulus');
+        load(stimulus_file,'stimulus','fs');
     catch
         error('Error occurred. Only .wav and .mat files allowed to load stimulus signal.')
     end 
@@ -59,7 +59,7 @@ end
 %% Obtain ear signals
 %
 % Repeat for each brs file
-for i=1%num
+parfor i=num
     % Load ir signal
     ir = audioread(fullfile(ir_dir,ir_files(i).name));
     
@@ -69,8 +69,18 @@ for i=1%num
         earSignals(:,j) = conv(stimulus,ir(:,j));
     end
     % Save
-    filename = fullfile(export_dir, filelist{n});
-    save(filename,'earSignals','fs');
+    filename = fullfile(export_dir, filelist{i});
+    save_variables(filename,{'earSignals','fs'},{earSignals,fs});
 end
 
+end
+
+%% ===== Functions =======================================================
+
+function save_variables(filename,var_names,variables)
+%SAVE_VARIABLES saves variables under their respective names in a .mat
+% file. This function prevents the MATLAB save function to fail an a parfor
+% loop.
+s = cell2struct(variables,var_names);
+save(filename, s)
 end

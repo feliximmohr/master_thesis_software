@@ -3,19 +3,31 @@
 clear
 close all
 clc
+
+% Start Two!Ears Framework
+addpath('TwoEars-1.5')
+startTwoEars()
+startAuditoryFrontEnd()
+
 %% Set paths and files
 % Specify output type ('mat_array', 'table')
 output_type = 'mat_array';
 
-dataset_dir = {'../data_set/exp1/',...
-               '../data_set/exp2/'};
+% Data set directory (containing earSignals)
+earSignal_dir = {'../generated/exp1/earSignals',...
+               '../generated/exp2/earSignals'};
            
-export_dir = fullfile(dataset_dir, 'features');
+% Directory to export files to           
+%export_dir = fullfile(dataset_dir, 'earSignals');
+export_dir = {'../generated/exp1/features',...
+              '../generated/exp2/features'};
 
+% Sample index to truncate features to
+trunc_idx = 100;
 %% Set parameters for ILD/ITD/IC computation
 %
 % Features to extract
-requests = {'ild', 'itd', 'ic'};
+requests = {'ild','itd','ic'};
 
 % Parameters of the auditory filterbank processor
 fb_type       = 'gammatone';
@@ -45,6 +57,6 @@ par = genParStruct('fb_type',fb_type,'fb_lowFreqHz',fb_lowFreqHz,...
                    'cc_wname',cc_wname);
 
 %% Compute and save
-for i=1:length(dataset_dir)
-    extract_features(requests,par,trunc_idx,dataset_dir{i},export_dir{i},output_type)
+for i=1:length(earSignal_dir)
+    extract_features(requests,par,earSignal_dir{i},export_dir{i},output_type,trunc_idx)
 end
