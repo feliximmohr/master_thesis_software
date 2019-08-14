@@ -103,7 +103,7 @@ parfor n = num
         % save to .mat file
         FsHz = dObj.ild{1}.FsHz;
         cfHz = dObj.ic{1}.cfHz;
-        save_variables([filename,'.mat'],['FsHz','cfHz',requests],[FsHz,cfHz,ild,itd,ic]);
+        save_variables([filename,'.mat'],['FsHz','cfHz',requests],{FsHz,cfHz,ild,itd,ic});
     elseif strcmp('csv',output_type)
         % TODO: adapt to file renaming
         % save each ild/itd/ic to seperate files
@@ -132,6 +132,6 @@ function save_variables(filename,var_names,variables)
 %SAVE_VARIABLES saves variables under their respective names in a .mat
 % file. This function prevents the MATLAB save function to fail an a parfor
 % loop.
-s = cell2struct(variables{1:length(var_names)},var_names,2);
+s = cell2struct(variables(1:length(var_names)),var_names,2);
 save([filename,'.mat'],'-struct','s')
 end
