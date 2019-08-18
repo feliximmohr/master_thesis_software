@@ -6,13 +6,14 @@ clear
 close all
 clc
 
+addpath('tools')
+
 %% Set paths and files
 % Data set directory
 dataset_dir = {'../data_set/exp1',...
                '../data_set/exp2'};
            
 % Directory to export files to
-%export_dir = fullfile(dataset_dir, 'features');
 export_dir = {'../generated/exp1/earSignals',...
               '../generated/exp2/earSignals'};
           

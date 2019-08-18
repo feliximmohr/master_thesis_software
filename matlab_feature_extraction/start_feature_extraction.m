@@ -3,6 +3,7 @@
 clear
 close all
 clc
+addpath('tools')
 
 % Start Two!Ears Framework
 addpath('TwoEars-1.5')
@@ -15,7 +16,7 @@ output_type = 'mat_array';
 
 % Data set directory (containing earSignals)
 earSignal_dir = {'../generated/exp1/earSignals',...
-               '../generated/exp2/earSignals'};
+                 '../generated/exp2/earSignals'};
            
 % Directory to export files to           
 %export_dir = fullfile(dataset_dir, 'earSignals');

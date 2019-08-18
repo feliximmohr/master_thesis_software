@@ -24,27 +24,23 @@ end
 dataset_name = strsplit(earSignal_dir, '/');
 dataset_name = dataset_name{end-1};
 
-% Create folder if inexistent
+% Create export folder if inexistent
 if ~exist(export_dir,'dir'); mkdir(export_dir); end
 
 % Obtain all file names and number of files
-earSignal_files = dir(earSignal_dir);
-file_flags = ~[earSignal_files.isdir];
-earSignal_files = earSignal_files(file_flags);
-num = 1:length(earSignal_files);
+[earSignal_files, num] = get_filelist(earSignal_dir);
 
 % Optionally reformat filenames to common standard
-[filelist{num}]=deal(earSignal_files.name);
 if reformat_filename
-    filelist = reformat_filename(filelist,dataset_name,'ild_itd_ic');
+    filelist_out = reformat_filename(earSignal_files,dataset_name,'ild_itd_ic');
 else
-    filelist = strrep(filelist,'earSignals',strjoin(requests,'_'));
+    filelist_out = strrep(earSignal_files,'earSignals',strjoin(requests,'_'));
 end
 
 %% Processing
 %
 % Load a signal
-load([earSignal_dir,filesep,earSignal_files(1).name],'earSignals', 'fs');
+load([earSignal_dir,filesep,earSignal_files{1}],'earSignals', 'fs');
 % Compute number of frames to preallocate outputs
 inSize = size(earSignals);
 ild_wSize = fs*par.ild_wSizeSec;    % Window duration in samples
@@ -62,7 +58,7 @@ num_angles = inSize(2)/2;
 num_inchannels = inSize(2);
 
 % Execute for each input file (in a parfor loop to speed up computation)
-parfor n = num
+parfor n = 1:num
     
     % Preallocate outputs
     ild = zeros(fb_nChannels,ild_nFrames,num_angles);
@@ -70,7 +66,7 @@ parfor n = num
     ic  = itd;
     
     % Load a signal
-    mat = load([earSignal_dir,filesep,earSignal_files(n).name]);
+    mat = load([earSignal_dir,filesep,earSignal_files{n}]);
     
     % Compute requested features for each stereo earSignal
     for i=1:2:num_inchannels
@@ -97,22 +93,13 @@ parfor n = num
     end
     
     % Save to file
-    filename = fullfile(export_dir, filelist{n});
+    filename = fullfile(export_dir, filelist_out{n});
     
     if strcmp('mat_array',output_type)
         % save to .mat file
         FsHz = dObj.ild{1}.FsHz;
         cfHz = dObj.ic{1}.cfHz;
-        save_variables([filename,'.mat'],['FsHz','cfHz',requests],{FsHz,cfHz,ild,itd,ic});
-    elseif strcmp('csv',output_type)
-        % TODO: adapt to file renaming
-        % save each ild/itd/ic to seperate files
-%         for i=1:360
-%             writematrix();
-%             writematrix();
-%             writematrix();
-%         end
-        
+        save_variables(filename,['FsHz','cfHz',requests],{FsHz,cfHz,ild,itd,ic});     
     elseif strcmp('table',output_type)
         % TODO: adapt to file renaming
         % untested
@@ -124,14 +111,4 @@ parfor n = num
     end
 end
 
-end
-
-%% ===== Functions =======================================================
-
-function save_variables(filename,var_names,variables)
-%SAVE_VARIABLES saves variables under their respective names in a .mat
-% file. This function prevents the MATLAB save function to fail an a parfor
-% loop.
-s = cell2struct(variables(1:length(var_names)),var_names,2);
-save([filename,'.mat'],'-struct','s')
 end

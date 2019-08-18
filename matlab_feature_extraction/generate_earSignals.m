@@ -21,32 +21,28 @@ stimuli_dir = fullfile(dataset_dir,'stimuli');
 dataset_name = strsplit(dataset_dir, '/');
 dataset_name = dataset_name{end};
 
-% Create folder if inexistent
+% Create export folder if inexistent
 if ~exist(export_dir,'dir'); mkdir(export_dir); end
 
 % Obtain all file names and number of files
-ir_files = dir(ir_dir);
-file_flags = ~[ir_files.isdir];
-ir_files = ir_files(file_flags);
-num = 1:length(ir_files);
+[ir_files, num] = get_filelist(ir_dir);
 % Restruct filenames to common standard
-[filelist{num}]=deal(ir_files.name);
-filelist = reformat_filename(filelist,dataset_name,'earSignals');
+filelist_out = reformat_filename(ir_files,dataset_name,'earSignals');
 
 % Define stimulus file in case not specified as input argument
 if nargin < 3
-    stimulus_file = dir(stimuli_dir);
-    file_flags = ~[stimulus_file.isdir];
-    stimulus_file = stimulus_file(file_flags);
-    stimulus_file = fullfile(stimuli_dir,stimulus_file.name);
+    stimulus_file = get_filelist(stimuli_dir);
+    stimulus_file = fullfile(stimuli_dir,stimulus_file{1});
 end
 [~,~,stimulus_file_ext] = fileparts(stimulus_file);
+
+if nargin < 4; stimulus_len = 1; end
 
 %% Load stimulus signal
 % Load either from .wav or .mat file
 if strcmp(stimulus_file_ext,'wav')
     [stimulus, fs] = audioread(stimulus_file);
-    % Extract one second 
+    % Extract specified length
     stimulus = stimulus(1:stimulus_len*fs);
 else
     try
@@ -59,9 +55,9 @@ end
 %% Obtain ear signals
 %
 % Repeat for each brs file
-parfor i=num
+parfor i=1:num
     % Load ir signal
-    ir = audioread(fullfile(ir_dir,ir_files(i).name));
+    ir = audioread(fullfile(ir_dir,ir_files{i}));
     
     earSignals = zeros(length(stimulus)+length(ir)-1,720);
     % Generate ear signals for each angle (0-359) by convolution
@@ -69,18 +65,8 @@ parfor i=num
         earSignals(:,j) = conv(stimulus,ir(:,j));
     end
     % Save
-    filename = fullfile(export_dir, filelist{i});
-    save_variables(filename,{'earSignals','fs'},{earSignals,fs});
+    filename = fullfile(export_dir, filelist_out{i});
+    save_variables([filename,'.mat'],{'earSignals','fs'},{earSignals,fs});
 end
 
-end
-
-%% ===== Functions =======================================================
-
-function save_variables(filename,var_names,variables)
-%SAVE_VARIABLES saves variables under their respective names in a .mat
-% file. This function prevents the MATLAB save function to fail an a parfor
-% loop.
-s = cell2struct(variables(1:length(var_names)),var_names,2);
-save([filename,'.mat'],'-struct','s')
 end
