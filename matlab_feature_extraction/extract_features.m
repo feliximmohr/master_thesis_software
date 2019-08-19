@@ -43,14 +43,17 @@ end
 load([earSignal_dir,filesep,earSignal_files{1}],'earSignals', 'fs');
 % Compute number of frames to preallocate outputs
 inSize = size(earSignals);
-ild_wSize = fs*par.ild_wSizeSec;    % Window duration in samples
-ild_hSize = fs*par.ild_hSizeSec;    % Step size between windows in samples
-cc_wSize = fs*par.cc_wSizeSec;
-cc_hSize = fs*par.cc_hSizeSec;         
-ild_nFrames = floor((inSize(1)-(ild_wSize-ild_hSize))/ild_hSize);
-cc_nFrames = floor((inSize(1)-(cc_wSize-cc_hSize))/cc_hSize);
 if nargin < 6
+    ild_wSize = fs*par.ild_wSizeSec;    % Window duration in samples
+    ild_hSize = fs*par.ild_hSizeSec;    % Step size between windows in samples
+    cc_wSize = fs*par.cc_wSizeSec;
+    cc_hSize = fs*par.cc_hSizeSec;         
+    ild_nFrames = floor((inSize(1)-(ild_wSize-ild_hSize))/ild_hSize);
+    cc_nFrames = floor((inSize(1)-(cc_wSize-cc_hSize))/cc_hSize);
     trunc_idx = ild_nFrames;
+else
+    ild_nFrames = trunc_idx;
+    cc_nFrames = trunc_idx;
 end
 
 fb_nChannels = par.fb_nChannels;
@@ -81,13 +84,13 @@ parfor n = 1:num
         
         % Save and optionally truncate requested data
         if any(strcmp(requests,'ild'))
-            ild(:,1:trunc_idx,(i+1)/2) = dObj.ild{1}.Data(1:trunc_idx,:).';
+            ild(:,:,(i+1)/2) = dObj.ild{1}.Data(1:trunc_idx,:).';
         end
         if any(strcmp(requests,'itd'))
-            itd(:,1:trunc_idx,(i+1)/2) = dObj.itd{1}.Data(1:trunc_idx,:).';
+            itd(:,:,(i+1)/2) = dObj.itd{1}.Data(1:trunc_idx,:).';
         end
         if any(strcmp(requests,'ic'))
-            ic(:,1:trunc_idx,(i+1)/2)  = dObj.ic{1}.Data(1:trunc_idx,:).';
+            ic(:,:,(i+1)/2)  = dObj.ic{1}.Data(1:trunc_idx,:).';
         end
 
     end
