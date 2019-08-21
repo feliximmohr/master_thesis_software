@@ -19,9 +19,10 @@ earSignal_dir = {'../generated/exp1/earSignals',...
                  '../generated/exp2/earSignals'};
            
 % Directory to export files to           
-%export_dir = fullfile(dataset_dir, 'earSignals');
-export_dir = {'../generated/exp1/features',...
-              '../generated/exp2/features'};
+% export_dir = {'../generated/exp1/features',...
+%               '../generated/exp2/features'};
+export_dir = {'/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/exp1/features/',...
+              '/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/exp2/features/'};
 
 % Sample index to truncate features to
 trunc_idx = 100;

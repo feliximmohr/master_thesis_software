@@ -1,14 +1,15 @@
-% Script to start feature extraction for specified data sets
-%TODO:
+% Script to create tubular data structure from existing files
+%TODO: extended documentation
 
 clear
 close all
 clc
 addpath('tools');
 
-dataset_dir = {'../generated/exp1/'
-               '../generated/exp2/'};
-export_dir  =  '../generated/';
+dataset_dir = {'/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/exp1/'};
+               %'../generated/exp2/'};
+%export_dir  =  '../generated/';
+export_dir  =  '/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/database/';
            
 % Define metadata
 % Listening positions
@@ -65,20 +66,17 @@ num_fsamples = size(features.ild,2);
 num_tsamples = size(targets,2);
 num_entries = 360 * num_fsamples * num_tsamples;
 
+% Prepare variables for table
+variables_data = insert_num2str({'ILD_','ITD_','IC_'},features.cfHz,'Hz',0);
+variables_meta = {'x','y','SFS_Method','Setup'};
+% variables_all = [variables_meta,variables_data];
+
 [x_t,y_t] = deal(zeros(num_entries,1));
 x_t(:) = x(pos_idx);
 y_t(:) = y(pos_idx);
 
 [sfs_method_t{1:num_entries,1}] = deal(sfs_method{method_idx});
 [setup_t{1:num_entries,1}] = deal(setup{1});
-
-%test = zeros(num_entries,4);
-%cfHz = repmat(features.cfHz,num_fsamples,1);
-%cfHz = cfHz(:);
-
-variables_data = insert_num2str({'ILD_','ITD_','IC_'},features.cfHz,'Hz',0);
-variables_meta = {'x','y','SFS_Method','Setup'};
-variables_all = [variables_meta,variables_data];
 
 ild_t = permute(features.ild,[2 1 3]);
 ild_t = vertcat_dim3(ild_t);
@@ -98,22 +96,18 @@ for q=1:num_tsamples
     targets_t(a:b,1) = t(:);
 end
 
-T1 = array2table([ild_t,itd_t,ic_t,targets_t],'VariableNames',[variables_data,'Localization_Azimuth']);
+% Create table consisting of metadata, features and targets
+T_meta = table(x_t,y_t,sfs_method_t,setup_t, 'VariableNames', variables_meta);
+T_data = array2table([ild_t,itd_t,ic_t,targets_t],'VariableNames',[variables_data, 'Localization_Azimuth']);
+T = [T_meta,T_data];
 
-T2 = table(x_t,y_t,sfs_method_t,setup_t, 'VariableNames', variables_meta);
+%T_all = [T_all;T];
 
-T=[T2,T1];
-T_all = [T_all;T];
-%HERE: cfHz as feature
-% variables = {'x','y','SFS Method','Setup','cfHz', 'ILD', 'ITD', 'IC','localization azimuth'};
-% for k=1:num_entries
-%     T_n = table(x,y,sfs_method,setup,cfHz,features.ild(:,:,i).',features.itd(:,:,i).',features.ic(:,:,i).',targets.loc_az, 'VariableNames', variables);
-%     T = [T;T_n];
-% end
-writetable(T_all,'data_set2.csv')
+filename = strrep(features_files{j},'ild_itd_ic.mat','data');
+writetable(T,[export_dir,filename,'.csv'])
 end
 
 end
 
 % Write table to file
-writetable(T_all,'data_set.csv')
+%writetable(T_all,'data_set.csv')
