@@ -4,7 +4,10 @@ from keras.utils import Sequence
 from os.path import splitext
 
 class DataGenerator(Sequence):
-    """Generates data for Keras."""
+    """
+    Generates data for Keras. Based on a global ID list load radomized single rows of data from file ID + local row ID pairs.
+    VERY slow.
+    """
     def __init__(self, list_IDs, data_dir, filelist, feature_label, target_label, n_rows=720000, batch_size=32, dim=96, shuffle=True):
         """Initialization."""
         self.list_IDs = list_IDs
@@ -76,12 +79,150 @@ class DataGenerator(Sequence):
 
         return X, y
     
+class DataGenerator2(Sequence):
+    """
+    Based on a global ID list load radomized batches of consecutive rows of data from file ID + local row ID pairs.
+    Slow.
+    """
+    def __init__(self, list_IDs, data_dir, filelist, feature_label, target_label, n_rows=720000, batch_size=32, dim=96, shuffle=True):
+        """Initialization."""
+        self.list_IDs = list_IDs
+        self.data_dir = data_dir
+        self.filelist = filelist
+        self.feature_label = feature_label
+        self.target_label = target_label
+        self.n_rows = n_rows
+        self.batch_size = batch_size
+        self.dim = dim
+        self.shuffle = shuffle
+        _, self.file_ext = splitext(self.filelist[0])
+        self.on_epoch_end() #trigger once at beginning
+
+    def __len__(self):
+        """Denotes the number of batches per epoch."""
+        return int(np.floor(len(self.list_IDs) / self.batch_size))
+
+    def __getitem__(self, index):
+        """Generate one batch of data."""
+        # Generate indexes of the batch
+        list_IDs_temp = self.list_IDs[index*self.batch_size:(index+1)*self.batch_size]
+
+        # Generate data
+        X, y = self.__data_generation(list_IDs_temp)
+
+        return X, y
+
+    #def on_epoch_end(self):
+    #    """Updates indexes after each epoch."""
+    #    self.indexes = self.list_IDs
+    #    if self.shuffle == True:
+    #        np.random.shuffle(self.indexes)
+
+    def __data_generation(self, list_IDs_temp):
+        """
+        Generates data containing batch_size samples
+        X : (n_samples, dim)
+        """
+        # Initialization
+        X = np.empty((self.batch_size, self.dim))
+        y = np.empty((self.batch_size))
+        
+        # get name of file to read from
+        file_idx = np.floor(np.divide(list_IDs_temp,self.n_rows))
+        file_idx = file_idx.astype(int)
+        multifile = np.argmax(file_idx>file_idx[0])
+        # get local row index from ID (global index)
+        local_idx = np.mod(list_IDs_temp,self.n_rows)
+            
+        if self.file_ext == '.h5':
+            # load data from HDF5 file
+            if not multifile:
+                local_idx = local_idx.tolist()
+                data = pd.read_hdf(self.data_dir+self.filelist[file_idx[0]], where=local_idx)
+            else:
+                local_idx1 = local_idx[:multifile].tolist()
+                local_idx2 = local_idx[multifile:].tolist()
+                df1 = pd.read_hdf(self.data_dir+self.filelist[file_idx[0]], where=local_idx1)
+                df2 = pd.read_hdf(self.data_dir+self.filelist[file_idx[multifile]], where=local_idx2)
+                data = pd.concat([df1, df2])
+        else:
+            # determine rows not to read
+            local_rows = np.arange(self.n_rows,dtype='int32')
+            skip_rows = np.delete(local_rows, local_idx)
+            # load data from csv file
+            data = pd.read_csv(self.data_dir+self.filelist[file_idx[0]], skiprows=skip_rows)
+              
+        # Store sample
+        X = data[self.feature_label].values
+
+        # Store targets
+        y = data[self.target_label].values
+
+        return X, y
+    
+class DataGenerator3(Sequence):
+    """
+    Based on a global ID list load radomized rows of data from single large table in single HDF5 file.
+    Might be slow?
+    """
+    def __init__(self, list_IDs, data_dir, filelist, feature_label, target_label, n_rows=720000, batch_size=32, dim=96, shuffle=True):
+        """Initialization."""
+        self.list_IDs = list_IDs
+        self.data_dir = data_dir
+        self.filelist = filelist
+        self.feature_label = feature_label
+        self.target_label = target_label
+        self.n_rows = n_rows
+        self.batch_size = batch_size
+        self.dim = dim
+        self.shuffle = shuffle
+        self.on_epoch_end() #trigger once at beginning
+
+    def __len__(self):
+        """Denotes the number of batches per epoch."""
+        return int(np.floor(len(self.list_IDs) / self.batch_size))
+
+    def __getitem__(self, index):
+        """Generate one batch of data."""
+        # Generate indexes of the batch
+        list_IDs_temp = self.list_IDs[index*self.batch_size:(index+1)*self.batch_size]
+
+        # Generate data
+        X, y = self.__data_generation(list_IDs_temp)
+
+        return X, y
+
+    def on_epoch_end(self):
+        """Updates indexes after each epoch."""
+        self.indexes = self.list_IDs
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+
+    def __data_generation(self, list_IDs_temp):
+        """
+        Generates data containing batch_size samples
+        X : (n_samples, dim)
+        """
+        # Initialization
+        X = np.empty((self.batch_size, self.dim))
+        y = np.empty((self.batch_size))
+            
+        data = pd.read_hdf(self.data_dir+self.filelist[0], mode='r', where=list_IDs_temp)
+              
+        # Store sample
+        X = data[self.feature_label].values
+
+        # Store targets
+        y = data[self.target_label].values
+
+        return X, y
+    
 def get_metadata_from_filename(filename):
     """
     Get metadata from filename of this project's specific naming convention.
     Obtained parameters include method, setup, position and original dataset_name.
     
-    Naming convention: 'DATASET-NAME_METHOD_SETUP_METHOD-PARAM_POSITION_data.FILE-EXTENSION'
+    Naming convention: 'DATASETNAME_METHOD_SETUP_METHOD-PARAM_POSITION_data.FILE-EXTENSION'
     Example: 'exp1_NFCHOA_L56_M006_pos01_data.csv'
     
     Parameters
