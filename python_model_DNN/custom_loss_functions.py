@@ -22,24 +22,6 @@ def mae_wrap_angle(y_true, y_pred):
     diff = angle_diff_deg(y_pred, y_true)
     return K.mean(K.abs(diff), axis=-1)
 
-def mse_wrap_angle_old(y_true, y_pred):
-    """Custom loss function based on MSE but with angles wrapped to 360 degree. Not working."""
-    diff = y_pred - y_true
-    if K.greater(diff,180) is not None:
-        diff = diff - 360
-    elif K.less(diff,-180) is not None:
-        diff = diff + 360
-    return K.mean(K.square(diff), axis=-1)
-
-def mae_wrap_angle_old(y_true, y_pred):
-    """Custom loss function based on MAE but with angles wrapped to 360 degree. Not working."""
-    diff = y_pred - y_true
-    if K.greater(diff,180) is not None:
-        diff = diff - 360
-    elif K.less(diff,-180) is not None:
-        diff = diff + 360
-    return K.mean(K.abs(diff), axis=-1)
-
 def angle_diff_deg(a,b):
     """Calculates angle differences in degrees."""
     a = tf_deg2rad(a)

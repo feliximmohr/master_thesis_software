@@ -64,3 +64,34 @@ def generate_metadata_dict(filelist):
     positions = dict(zip(positions,np.arange(len(positions))))
     
     return methods, setups, positions
+
+# deprecated
+#filename = 'test.h5'
+
+#df = pd.read_csv(data_dir+filelist[1])
+
+# Save to HDF5
+#df.to_hdf(filename, 'data', mode='w', format='table')
+#del df    # allow df to be garbage collected
+
+# Append more data
+#df2 = pd.read_csv(data_dir+filelist[2])
+#df2.to_hdf(filename, 'data', append=True)
+
+def mse_wrap_angle_old(y_true, y_pred):
+    """Custom loss function based on MSE but with angles wrapped to 360 degree. Not working."""
+    diff = y_pred - y_true
+    if K.greater(diff,180) is not None:
+        diff = diff - 360
+    elif K.less(diff,-180) is not None:
+        diff = diff + 360
+    return K.mean(K.square(diff), axis=-1)
+
+def mae_wrap_angle_old(y_true, y_pred):
+    """Custom loss function based on MAE but with angles wrapped to 360 degree. Not working."""
+    diff = y_pred - y_true
+    if K.greater(diff,180) is not None:
+        diff = diff - 360
+    elif K.less(diff,-180) is not None:
+        diff = diff + 360
+    return K.mean(K.abs(diff), axis=-1)
