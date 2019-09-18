@@ -9,6 +9,8 @@ file_flags = ~[files.isdir];
 files = files(file_flags);
 % Write filenames in cell array
 num_files = length(files);
-[filelist{1:num_files}]=deal(files.name);
+[filelist{1:num_files}] = deal(files.name);
+% Sort filelist
+filelist = sortrows(filelist);
 end
 
