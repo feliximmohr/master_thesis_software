@@ -10,8 +10,8 @@ addpath('tools')
 
 %% Set paths and files
 % Data set directory
-dataset_dir = {'../data_set/exp1',...
-               '../data_set/exp2'};
+dataset_dir = {'../data_set/exp2',...
+               '../data_set/exp1'};
            
 % Directory to export files to
 export_dir = {'../generated/exp1/earSignals',...
