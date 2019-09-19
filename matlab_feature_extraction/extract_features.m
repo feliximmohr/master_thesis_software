@@ -56,23 +56,23 @@ else
     cc_nFrames = trunc_idx;
 end
 
-fb_nChannels = par.fb_nChannels;
-num_angles = inSize(2)/2;
-num_inchannels = inSize(2);
+n_fb_channels = par.fb_nChannels;
+n_angles = inSize(2)/2;
+n_inchannels = inSize(2);
 
 % Execute for each input file (in a parfor loop to speed up computation)
 parfor n = 1:num
     
     % Preallocate outputs
-    ild = zeros(fb_nChannels,ild_nFrames,num_angles);
-    itd = zeros(fb_nChannels,cc_nFrames,num_angles);
+    ild = zeros(n_fb_channels,ild_nFrames,n_angles);
+    itd = zeros(n_fb_channels,cc_nFrames,n_angles);
     ic  = itd;
     
     % Load a signal
     mat = load([earSignal_dir,filesep,earSignal_files{n}]);
     
     % Compute requested features for each stereo earSignal
-    for i=1:2:num_inchannels
+    for i=1:2:n_inchannels
         % Create a data object based on the ear signals
         dObj = dataObject(mat.earSignals(:,i:i+1),mat.fs);
 
@@ -98,19 +98,21 @@ parfor n = 1:num
     % Save to file
     filename = fullfile(export_dir, filelist_out{n});
     
-    if strcmp('mat_array',output_type)
+    if strcmp('mat_array', output_type)
         % save to .mat file
         FsHz = dObj.ild{1}.FsHz;
         cfHz = dObj.ic{1}.cfHz;
-        save_variables(filename,['FsHz','cfHz',requests],{FsHz,cfHz,ild,itd,ic});     
-    elseif strcmp('table',output_type)
-        % TODO: adapt to file renaming
-        % untested
+        data_size = [n_fb_channels ild_nFrames n_angles];
+        save_variables(filename,...
+            ['FsHz','cfHz','data_size','requests',requests],...
+            {FsHz,cfHz,data_size,requests,ild,itd,ic});     
+    elseif strcmp('table', output_type)
 %         variables = {'cfHz', 'ILD', 'ITD', 'IC'};
 %         for i=1:360
 %             T = table(dObj.ic{1}.cfHz.', ild(:,:,i).', itd(:,:,i).', ic(:,:,i).', 'VariableNames', variables);
 %             writetable(T, [filename, '.csv'])
 %         end
+        
     end
 end
 
