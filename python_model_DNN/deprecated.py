@@ -95,3 +95,80 @@ def mae_wrap_angle_old(y_true, y_pred):
     elif K.less(diff,-180) is not None:
         diff = diff + 360
     return K.mean(K.abs(diff), axis=-1)
+
+
+
+
+
+
+class DataGenerator_raw1(Sequence):
+    """
+    Generates data for Keras. TODO
+    TODO
+    """
+    def __init__(self, list_IDs, filename, keys, feature_label, target_label, batch_size=32, dim=96, shuffle=True):
+        """Initialization."""
+        self.filename = filename
+        self.list_IDs = list_IDs
+        self.keys = keys
+        self.feature_label = feature_label
+        self.target_label = target_label
+        self.batch_size = batch_size
+        self.dim = dim
+        self.shuffle = shuffle
+        _, self.file_ext = splitext(self.filename)
+        
+        self.feature_data = pd.read_hdf(self.filename, self.keys[0])
+        self.target_data = pd.read_hdf(self.filename, self.keys[1])
+        
+        self.n_subjects = 20 #TODO: get from target df
+        self.n_frames = 100 #TODO: get elsewhere
+        self.n_angles = 360 #TODO: get elsewhere
+        self.on_epoch_end() #trigger once at beginning
+
+    def __len__(self):
+        """Denotes the number of batches per epoch."""
+        return int(np.floor(len(self.list_IDs) / self.batch_size))
+
+    def __getitem__(self, index):
+        """Generate one batch of data."""
+        # Generate indexes of the batch
+        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+
+        # Find list of IDs
+        list_IDs_temp = [self.list_IDs[k] for k in indexes]
+
+        # Generate data
+        X, y = self.__data_generation(list_IDs_temp)
+
+        return X, y
+
+    def on_epoch_end(self):
+        """Updates indexes after each epoch."""
+        self.indexes = np.arange(len(self.list_IDs))
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+
+    def __data_generation(self, list_IDs_temp):
+        """
+        Generates data containing batch_size samples
+        X : (n_samples, dim)
+        """
+        # Initialization
+        X = np.empty((self.batch_size, self.dim))
+        y = np.empty((self.batch_size), dtype=int)
+        # Generate data
+        for i, ID in enumerate(list_IDs_temp):
+            feature_idx = np.floor(ID/self.n_subjects) #one feature row for all 20 subjects 0...19 -> f=0
+            targets_idx = np.floor(ID/(self.n_subjects*self.n_frames)) #one target row for 100 frames for each subject 0...1999 -> t=0
+            subject_idx = ID - feature_idx*self.n_subjects 
+            
+            target = self.target_data.iloc[targets_idx].values
+            
+            # Store sample
+            X[i,] = self.feature_data.iloc[feature_idx].values
+
+            # Store targets
+            y[i] = target[subject_idx]
+
+        return X, y
