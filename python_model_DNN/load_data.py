@@ -101,7 +101,7 @@ def get_metadata_from_filename(filename):
     
     return method, setup, position, dataset_name
 
-def get_ignore_ids(ignore_list, cond_lookup_df, pos_lookup_table=None):
+def get_ignore_ids(ignore_list, cond_lookup_df, pos_lookup_df=None, sub_lookup_df=None):
     """
     Get condition (cond_id) and position ids (pos_id) to ignore as specified in list of strings ignore_list.
     Returns two unique lists for cond_id and pos_id, respectively.
@@ -109,10 +109,12 @@ def get_ignore_ids(ignore_list, cond_lookup_df, pos_lookup_table=None):
     Parameters
     ----------
     ignore_list : list
-        List of strings containing position or condition parameter substrings to ignore.
+        List of strings containing position, condition or subject parameter substrings to ignore, e.g. ['NFCHOA', 'pos1', 'subject_1']
     cond_lookup_df : pandas.DataFrame object
         DataFrame object containing all conditions and corresponding indexes.
     pos_lookup_df : pandas.DataFrame object
+        Not yet supported.
+    sub_lookup_df : pandas.DataFrame object
         Not yet supported.
         
     Returns
@@ -120,21 +122,28 @@ def get_ignore_ids(ignore_list, cond_lookup_df, pos_lookup_table=None):
     ignore_cond_ids : list
         List of condition ids to ignore as specified by ignore_list.
     ignore_pos_ids : list
-        List of condition ids to ignore as specified by ignore_list.
+        List of position ids to ignore as specified by ignore_list.
+    ignore_sub_ids : list
+        List of subject ids to ignore as specified by ignore_list.
     """
     ignore_cond_ids = []
     ignore_pos_ids = []
+    ignore_sub_ids = []
     cond_ign = []
     pos_ign = []
+    sub_ign = []
     # do for each element in ignore_list
     for ign in ignore_list:
         # check if element to ignore related to positions or conditions
         if 'pos' in ign:
             pos_ign = [int(ign[3:])-1]
+        elif 'subject' in ign:
+            sub_ign = [int(ign[8:])]
         else:
             cond_ign = cond_lookup_df.index[cond_lookup_df['sfs_method'].str.contains(ign)].tolist()
         # append to list
         ignore_pos_ids.extend(pos_ign)
         ignore_cond_ids.extend(cond_ign)
+        ignore_sub_ids.extend(sub_ign)
     # return unique list
-    return list(set(ignore_cond_ids)), list(set(ignore_pos_ids))
+    return list(set(ignore_cond_ids)), list(set(ignore_pos_ids)), list(set(ignore_sub_ids))
