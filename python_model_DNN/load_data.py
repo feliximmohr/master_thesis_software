@@ -8,7 +8,7 @@ class DataGenerator_raw(Sequence):
     Generates data for Keras. TODO
     TODO
     """
-    def __init__(self, list_IDs, feature_data, target_data, batch_size=32, dim=96, shuffle=True):
+    def __init__(self, list_IDs, feature_data, target_data, batch_size=32, dim=96, shuffle=True, n_frames=100):
         """Initialization."""
         self.list_IDs = list_IDs
         self.feature_data = feature_data
@@ -18,7 +18,7 @@ class DataGenerator_raw(Sequence):
         self.shuffle = shuffle
         
         self.n_subjects = target_data.shape[1]
-        self.n_frames = 100 #TODO: get elsewhere
+        self.n_frames = n_frames
         self.n_angles = 360 #TODO: get elsewhere
         
         self.on_epoch_end() #trigger once at beginning
