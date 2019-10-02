@@ -11,21 +11,18 @@ startTwoEars()
 startAuditoryFrontEnd()
 
 %% Set paths and files
-% Specify output type ('mat_array', 'table')
-output_type = 'mat_array';
 
 % Data set directory (containing earSignals)
 earSignal_dir = {'../generated/exp1/earSignals',...
                  '../generated/exp2/earSignals'};
-           
+ 
 % Directory to export files to           
-% export_dir = {'../generated/exp1/features',...
-%               '../generated/exp2/features'};
-export_dir = {'/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/exp1/features/',...
-              '/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/exp2/features/'};
+export_dir = {'../generated/exp1/features',...
+              '../generated/exp2/features'};
 
-% Sample index to truncate features to
-trunc_idx = 100;
+% Sample indices to truncate features to
+start_idx = 31;
+trunc_idx = 40;
 %% Set parameters for ILD/ITD/IC computation
 %
 % Features to extract
@@ -60,5 +57,5 @@ par = genParStruct('fb_type',fb_type,'fb_lowFreqHz',fb_lowFreqHz,...
 
 %% Compute and save
 for i=1:length(earSignal_dir)
-    extract_features(requests,par,earSignal_dir{i},export_dir{i},output_type,trunc_idx)
+    extract_features(requests,par,earSignal_dir{i},export_dir{i},trunc_idx,start_idx)
 end
