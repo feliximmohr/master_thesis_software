@@ -65,9 +65,8 @@ feature_filelist = sort(feature_filelist);
 target_filelist = sort(target_filelist);
     
 % Load metadata
-par = load(feature_filelist{1},'requests','data_size','cfHz');
-par.requests = {'ild','itd','ic'};
-par.data_size = [32 100 360];
+par = load(feature_filelist{1},'par_save');
+par = par.par_save;
 
 % Initialize
 n_fb_channel = par.data_size(1);
@@ -159,12 +158,12 @@ feature_table = array2table(feature_data, 'VariableNames', var_f);
 
 % Write feature data
 disp('Writing feature data...');
-%writetable(feature_table,fullfile(export_dir,'feature_data.csv'));
+writetable(feature_table,fullfile(export_dir,'feature_data.csv'));
 disp('Done.');
 
 % Write target data
 disp('Writing target data...');
-%writetable(target_table,fullfile(export_dir,'target_data.csv'));
+writetable(target_table,fullfile(export_dir,'target_data.csv'));
 disp('Done.');
 
 % Write id reference table (global_id)
@@ -174,18 +173,23 @@ disp('Done.');
 
 % Write position table (pos_id)
 disp('Writing position table...');
-%writetable(pos_table,fullfile(export_dir,'position_table.csv'));
+writetable(pos_table,fullfile(export_dir,'position_table.csv'));
 disp('Done.');
 
 % Write condition table (cond_id)
 disp('Writing condition table...');
-%writetable(cond_table,fullfile(export_dir,'condition_table.csv'));
+writetable(cond_table,fullfile(export_dir,'condition_table.csv'));
 disp('Done.');
 
 % Write setup table (setup_id)
 %disp('Writing setup table...');
 %writetable(setup_table,'setup_table.csv');
 %disp('Done.');
+
+% Write feature structure info to file
+size_table = struct2table(par);
+writetable(size_table,fullfile(export_dir,'feature_par.csv'));
+disp('Everything done.');
 
 % =========================================================================
 
