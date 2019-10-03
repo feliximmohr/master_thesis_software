@@ -1,9 +1,15 @@
+"""
+A python module that provides functions and classes to load data for training.
+"""
+
 import numpy as np
 import pandas as pd
 from keras.utils import Sequence
 from os.path import splitext
 
-class DataGenerator(Sequence):
+from utils import get_metadata_from_filename
+
+class DG_redundant_single_rows(Sequence):
     """
     Generates data for Keras. Based on a global ID list load radomized single rows of data from file ID + local row ID pairs.
     VERY slow.
@@ -79,7 +85,7 @@ class DataGenerator(Sequence):
 
         return X, y
     
-class DataGenerator2(Sequence):
+class DG_redundant_consec(Sequence):
     """
     Based on a global ID list load radomized batches of consecutive rows of data from file ID + local row ID pairs.
     Slow.
@@ -160,7 +166,7 @@ class DataGenerator2(Sequence):
 
         return X, y
     
-class DataGenerator3(Sequence):
+class DG_redundant_single_table(Sequence):
     """
     Based on a global ID list load radomized rows of data from single large table in single HDF5 file.
     Might be slow?
@@ -216,40 +222,6 @@ class DataGenerator3(Sequence):
         y = data[self.target_label].values
 
         return X, y
-    
-    
-    def get_metadata_from_filename(filename):
-    """
-    Get metadata from filename of this project's specific naming convention.
-    Obtained parameters include method, setup, position and original dataset_name.
-    
-    Naming convention: 'DATASETNAME_METHOD_SETUP_METHOD-PARAM_POSITION_data.FILE-EXTENSION'
-    Example: 'exp1_NFCHOA_L56_M006_pos01_data.csv'
-    
-    Parameters
-    ----------
-    filename : string
-        Name of a file containing some metadata information.
-        
-    Returns
-    -------
-    method : string
-        SFS method obtained from file name.
-    setup : string
-        Reproduction setup as obtained from filename.
-    position : string
-        Position identifier as obtained from filename.
-    dataset_name : string
-        Name of original data set as obtained from filename.
-    """
-    metadata = filename.split('_')
-    
-    dataset_name = metadata[0]
-    method = metadata[1] + '_' + metadata[3]
-    setup = metadata[2]
-    position = metadata[4]
-    
-    return method, setup, position, dataset_name
 
 def get_ID_list(filelist, ignore_list, n_rows=[]):
     """
@@ -282,7 +254,7 @@ def get_ID_list(filelist, ignore_list, n_rows=[]):
     # get number of files and rows per file (optional)
     n_files = len(filelist)
     if not n_rows:
-        with open(data_dir+filelist[0]) as file:
+        with open(filelist[0]) as file:
             n_rows = len(file.readlines())-1 #skip column label
     
     # initialize variables
