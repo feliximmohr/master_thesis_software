@@ -69,13 +69,11 @@ par = load(feature_filelist{1},'par_save');
 par = par.par_save;
 
 % Initialize
-n_fb_channel = par.data_size(1);
-n_frames = par.data_size(2);
-n_angles = par.data_size(3);
-n_frames_file = n_frames*n_angles;
+n_fb_channel = par.fb_nChannels;
+n_frames_file = par.nFrames*par.nAngles;
 n_features = length(par.requests)*n_fb_channel;
 feature_data = zeros(n_frames_file*n_files, n_features);
-target_data = zeros(n_files*n_angles,n_subjects);
+target_data = zeros(n_files*par.nAngles,n_subjects);
 
 global_id = uint32(0:n_frames_file*n_files*n_subjects-1).';
 p_id = zeros(1, n_frames_file*n_files, 'uint8');
@@ -107,7 +105,7 @@ for j = 1:n_files
     feature_data(f_ind,:) = data;
 
     % Reshape targets to table structure
-    t_ind = (j-1)*n_angles+1:j*n_angles;
+    t_ind = (j-1)*par.nAngles+1:j*par.nAngles;
     target_data(t_ind,:) = targets;
 
     % Create reference list
