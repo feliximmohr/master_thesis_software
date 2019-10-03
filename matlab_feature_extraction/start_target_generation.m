@@ -17,5 +17,5 @@ export_dir = {'../generated/exp1/targets/',...
 
 %% Compute and save
 for i=1:length(stats_dir)
-    calc_loc_az_wrt_head_ori(stats_dir,export_dir)
+    calc_loc_az_wrt_head_ori(stats_dir{i},export_dir{i})
 end
