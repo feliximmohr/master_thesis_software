@@ -8,7 +8,7 @@ class DataGenerator_raw(Sequence):
     Generates data for Keras. TODO
     TODO
     """
-    def __init__(self, list_IDs, feature_data, target_data, batch_size=32, dim=96, shuffle=True, n_frames=100):
+    def __init__(self, list_IDs, feature_data, target_data, batch_size=32, dim=96, shuffle=True, n_frames=100, n_angles=360):
         """Initialization."""
         self.list_IDs = list_IDs
         self.feature_data = feature_data
@@ -19,7 +19,7 @@ class DataGenerator_raw(Sequence):
         
         self.n_subjects = target_data.shape[1]
         self.n_frames = n_frames
-        self.n_angles = 360 #TODO: get elsewhere
+        self.n_angles = n_angles
         
         self.on_epoch_end() #trigger once at beginning
 
@@ -57,14 +57,14 @@ class DataGenerator_raw(Sequence):
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             feature_idx = np.floor(ID/self.n_subjects) #one feature row for all 20 subjects 0...19 -> f=0
-            targets_idx = np.floor(ID/(self.n_subjects*self.n_frames)) #one target row for 100 frames for each subject 0...1999 -> t=0
+            target_idx = np.floor(ID/(self.n_subjects*self.n_frames)) #one target row for 100 frames for each subject 0...1999 -> t=0
             subject_idx = ID - feature_idx*self.n_subjects 
            
             # Store sample
             X[i,] = self.feature_data[int(feature_idx)]
 
             # Store targets
-            y[i] = self.target_data[int(targets_idx),int(subject_idx)]
+            y[i] = self.target_data[int(target_idx),int(subject_idx)]
             
         return X, y
     
