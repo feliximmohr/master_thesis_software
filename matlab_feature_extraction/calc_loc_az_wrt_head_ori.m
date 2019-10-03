@@ -1,15 +1,17 @@
-% Calculate localization azimuth with respect to head orientation for all
-% conditions and write results to csv file.
+function calc_loc_az_wrt_head_ori(stats_dir,export_dir)
+%CALC_LOC_AZ_WRT_HEAD_ORI calculates the localization azimuth with respect 
+% to head orientation for all conditions and write results to csv file.
+%   #TODO: extended documentation
 %
+%   Usage: calc_loc_az_wrt_head_ori(stats_dir,export_dir)
+%
+%   Input parameters:
+%       stats_dir   - path to data set directory
+%       export_dir  - path to directory to save the computation outcome
+% 
 
-% Specify output type ('file_per_cond_pos', 'file_per_cond')
-%output_type = 'file_per_cond_pos';
-
-%% Set paths
-dataset_name = 'exp1';
-stats_dir = ['../data_set/',dataset_name,'/analysis/stats/'];
+%% Get filenames
 filenames = dir([stats_dir, '*_corrected_azimuth.txt']);
-export_dir = ['../generated/',dataset_name,'/targets/'];
 % Create dir if not existing
 if ~exist(export_dir,'dir'); mkdir(export_dir); end
 
@@ -40,6 +42,10 @@ for i=1:size(filenames)
         az_wrt_head = loc_az - head_or;
         az_wrt_head = wrapTo180(az_wrt_head);
         % Save to csv file
-        writematrix(az_wrt_head,[filenames_out{i},'_pos',int2str(j),'_az_wrt_head.csv']);
+        pos_idx = int2str(j);
+        if length(pos_idx)<2; pos_idx=['0',pos_idx]; end
+        filename_out = [filenames_out{i},'_pos',pos_idx,'_az_wrt_head.csv'];
+        writematrix(az_wrt_head,filename_out);
     end
+end
 end
