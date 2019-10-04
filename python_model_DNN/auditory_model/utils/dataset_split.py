@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-def create_split(ID_ref_t, cond_t, test_subset, valid_subset=[], valid_split=0.2):
+def create_split(ID_ref_t, cond_t, test_subset=[], valid_subset=[], test_split=0.2, valid_split=0.2):
     """TODO"""
 
     # Initialization
@@ -26,7 +26,10 @@ def create_split(ID_ref_t, cond_t, test_subset, valid_subset=[], valid_split=0.2
     idx_list = np.unique(np.concatenate((list_IDs_valid, list_IDs_test)))
     list_IDs = ID_ref_t.index.values.astype(np.uint32)
     list_IDs_train = np.delete(list_IDs, idx_list)
-
+    
+    # in case of no test_subset use sklearns train_test_split
+    if not test_subset:
+        list_IDs_train, list_IDs_test = train_test_split(list_IDs_train, shuffle=True, test_size=test_split)
     # in case of no valid_subset use sklearns train_test_split
     if not valid_subset:
         list_IDs_train, list_IDs_valid = train_test_split(list_IDs_train, shuffle=True, test_size=valid_split)
