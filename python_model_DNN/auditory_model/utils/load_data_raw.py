@@ -56,7 +56,7 @@ class DataGenerator_raw(Sequence):
         """
         # Initialization
         X = np.empty((self.batch_size, self.dim))
-        y = np.empty((self.batch_size), dtype=int)
+        y = np.empty((self.batch_size))
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             feature_idx = np.floor(ID/self.n_subjects) #one feature row for all 20 subjects 0...19 -> f=0
