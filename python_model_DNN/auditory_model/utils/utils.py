@@ -2,16 +2,17 @@
 Various utility functions.
 """
 
-import numpy as np
-import pandas as pd
+import json
+import sys
 from os import walk
 
 def get_filelist(data_dir):
-    """Load filelist."""
+    """Load filelist and return sorted version of it."""
     filelist = []
     for (_, _, filenames) in walk(data_dir):
         filelist.extend(filenames)
-    return filelist.sort()
+    filelist.sort()
+    return filelist
 
 def get_metadata_from_filename(filename):
     """
@@ -45,3 +46,12 @@ def get_metadata_from_filename(filename):
     position = metadata[4]
     
     return method, setup, position, dataset_name
+
+def open_json(dir, filename):
+    """Open json file and return its contents."""
+    with open(dir + filename) as json_file:
+        content = json.load(json_file)
+    return content
+
+def write_var_stdout(x):
+    np.savetxt(sys.stdout, x)
