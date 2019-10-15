@@ -29,6 +29,37 @@ def model_complete_eval(model, history, part_test, params, batch_size=1024, work
         
     return b_gen
 
+def model_eval_pos(model, history, part_test, params, ID_ref, batch_size=1000, workers=4):
+    """TODO"""
+    # Get metrics from history dict
+    metrics, _, _ = get_history_metrics(history)
+    
+    # Show model/net topology
+    model.summary()
+    
+    il = np.min(part_test)
+    iu = np.max(part_test)
+    
+    ID = {}
+    pos_str = ['pos1','pos2','pos3','pos4','pos5','pos6','pos7','pos8','pos9','pos10']
+    n_pos = len(pos_str)
+    for i,s in enumerate(pos_str):
+        ID[s] = ID_ref[il:iu+1].loc[ID_ref['pos_id'] == i].index.values
+    
+    mae_p = np.zeros(n_pos)
+    mse_p = np.zeros(n_pos)
+    loc_pred = np.zeros([n_pos,len(ID[pos_str[0]])])
+    for i,s in enumerate(pos_str):
+        params['batch_size'] = batch_size
+        b_gen = DataGenerator_raw(ID[s], **params)
+        mae_p[i], mse_p[i] = model.evaluate_generator(b_gen,verbose=0,use_multiprocessing=True, workers=4)
+        lpred = model.predict_generator(b_gen,verbose=0,use_multiprocessing=True, workers=4)
+        loc_pred[i] = lpred.T
+        print(s+' : ')
+        print(mae_p[i])
+    
+    return mae_p, mse_p, loc_pred
+
 def model_eval(model, b_gen, metrics, workers=4):
     """
     Evaluate model on data generator.
