@@ -127,3 +127,17 @@ def get_subset_sample_idx(ID_ref, cond_ids, pos_ids, subject_ids):
 
     # Return unique idx list
     return np.unique(idx_list)
+
+def get_pos_IDs(part, ID_ref, dictn=False):
+    """Get list or dictionary containing all IDs in partition corresponding to one position."""
+    if dictn:
+        list_ID_x = {}
+        pos = ['pos1','pos2','pos3','pos4','pos5','pos6','pos7','pos8','pos9','pos10']
+        for i,s in enumerate(pos):
+            list_ID_x[s] = ID_ref.iloc[part].loc[ID_ref['pos_id'] == i].index.values
+    else:
+        pos = np.unique(ID_ref['pos_id'].values)
+        list_ID_x = []
+        for i in pos:
+            list_ID_x.append(ID_ref.iloc[part].loc[ID_ref['pos_id'] == i].index.values)
+    return list_ID_x, pos
