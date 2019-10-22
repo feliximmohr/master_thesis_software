@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from utils.load_data_raw import DataGenerator_raw
+from utils.custom_loss import angle_diff_deg
 
 def model_complete_eval(model, history, part_test, params, batch_size=1024, workers=4):
     """Evaluate a specified model. Show model topology, training history and loss on test data set."""
@@ -84,10 +85,60 @@ def model_pred_on_gen_batch(model, b_gen, b_idx=0):
     pred = model.predict_on_batch(X)
     return pred, y
 
+def calc_errors_m(model, part_x, params, pos_ids, verbose=0, workers=4):
+    """TODO."""
+    L = 20 # 20 subjects
+    B = 3600 # 360 angle * 10 repitions (?)
+    X = pos_ids.shape[0] # 10 positions
+    
+    # Initialization
+    delta_x = []
+    b_gen = []
+    delta_mean_x = np.zeros(X)
+    sigma_sq_m = []
+    
+    #DELTA_l,m_b(x)
+    for x in pos_ids:
+        b_gen.append(DataGenerator_raw(part_x[x], **params))
+        y_x = get_y_gen(b_gen[x])
+        pred_x = model.predict_generator(b_gen[x],verbose=verbose,use_multiprocessing=True, workers=workers, max_queue_size=1000)
+        delta = np.zeros(part_x[x].shape[0])
+        for i in np.arange(part_x[x].shape[0]):
+            delta[i] = angle_diff_deg(pred_x[i],y_x[i])
+        delta_x.append(delta)
+
+    #DELTA_MEAN_m(x)
+    for x in pos_ids:
+        delta_mean_x[x] = np.sum(delta_x[x]) / (L * B)
+        #delta_mean_x[x] = np.mean(delta_x[x])
+    
+    # Mean Square Error of particular method
+    MSE_m = np.sum(np.square(delta_x)) / (L*B*X)
+    # systematic deviations a.k.a. bias for each position
+    tau_sq_m = np.sum(np.square(delta_mean_x)) / X
+    # stochastic variations / variance
+    for x in pos_ids:
+        sigma_sq_m.append(delta_x[x] - delta_mean_x[x])
+    sigma_sq_m = np.sum(np.square(sigma_sq_m)) / (L*B*X)
+    
+    return MSE_m, tau_sq_m, sigma_sq_m, delta_x, delta_mean_x
+
+def get_y_gen(b_gen):
+    """
+    TODO.
+    """
+    
+    l = b_gen.__len__()
+    y = np.array([])
+    for b_idx in range(l):
+        _,y_t = b_gen.__getitem__(b_idx)
+        y = np.append(y,y_t)
+    return y
+
 def create_test_params(feature_data, target_data, par, batch_size=1024, shuffle=False):
     """Create and return a DataGenerator object."""
     
-    # check is data is a pandas DataFrame object
+    # check if data is a pandas DataFrame object
     if isinstance(feature_data, pd.DataFrame):
         feature_data = feature_data.values
     if isinstance(target_data, pd.DataFrame):
