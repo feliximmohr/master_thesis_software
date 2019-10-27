@@ -4,10 +4,10 @@ Various functions for model evaluation.
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from utils.load_data_raw import DataGenerator_raw
 from utils.custom_loss import angle_diff_deg
+from utils.plot import plot_history
 
 def model_complete_eval(model, history, part_test, params, batch_size=1024, workers=4):
     """Evaluate a specified model. Show model topology, training history and loss on test data set."""
@@ -136,7 +136,7 @@ def get_y_gen(b_gen):
     return y
 
 def create_test_params(feature_data, target_data, par, batch_size=1024, shuffle=False):
-    """Create and return a DataGenerator object."""
+    """Create and return a parameter dict for a DataGenerator object."""
     
     # check if data is a pandas DataFrame object
     if isinstance(feature_data, pd.DataFrame):
@@ -161,13 +161,3 @@ def get_history_metrics(history):
     n = len(v_met)
     metrics = metrics[n:]
     return metrics, v_met, n
-
-def plot_history(hist, val_hist, metric_str):
-    """Plot train history."""
-    plt.plot(hist)
-    plt.plot(val_hist)
-    plt.title('Model loss ('+metric_str+')')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Validation'], loc='upper left')
-    plt.show()
