@@ -22,6 +22,18 @@ def mae_wrap_angle(y_true, y_pred):
     diff = tf_angle_diff_deg(y_pred, y_true)
     return K.mean(K.abs(diff), axis=-1)
 
+def mae_wrap_angle_bound(y_true, y_pred):
+    """
+    Custom loss function based on MAE but with angles wrapped to 360 degree.
+    Tensorflows atan2 is used. Therefore conversion to radiant and back is performed.
+    """
+    y_pred_neg = tf.math.negative(y_pred)
+    cond = tf.math.logical_or(tf.math.greater(y_pred,180), tf.math.less(y_pred,-180))
+    y_pred = tf.compat.v2.where(cond,y_pred_neg,y_pred)
+    
+    diff = tf_angle_diff_deg(y_pred, y_true)
+    return K.mean(K.abs(diff), axis=-1)
+
 def tf_angle_diff_deg(a,b):
     """Calculates angle differences in degrees in tensorflow."""
     a = tf_deg2rad(a)
