@@ -1,4 +1,6 @@
-% Script to start feature extraction for specified data sets
+% Script to start feature extraction for specified data sets and parameters
+% with the Auditory front-end of the Two!Ears Auditory Model 1.5.
+% DOI: 10.5281/zenodo.1458420
 
 clear
 close all
@@ -24,7 +26,7 @@ export_dir = {'../generated/exp1/features',...
 start_idx = 31;
 trunc_idx = 40;
 %% Set parameters for ILD/ITD/IC computation
-%
+
 % Features to extract
 requests = {'ild','itd','ic'};
 
@@ -57,5 +59,6 @@ par = genParStruct('fb_type',fb_type,'fb_lowFreqHz',fb_lowFreqHz,...
 
 %% Compute and save
 for i=1:length(earSignal_dir)
-    extract_features(requests,par,earSignal_dir{i},export_dir{i},trunc_idx,start_idx)
+    extract_features(requests,par,earSignal_dir{i},export_dir{i},...
+        trunc_idx,start_idx)
 end

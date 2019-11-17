@@ -1,19 +1,21 @@
 function generate_earSignals(dataset_dir,export_dir,stimulus_file,stimulus_len)
-%GEN_EARSIGNALS generates binaural ear signals for head rotation angle by
-% convolving a stimulus signal with binaural room impulse responses.
-%   #TODO: extended documentation
+%GEN_EARSIGNALS generates binaural ear signals for each head rotation angle by
+% convolving a stimulus signal with binaural impulse responses. The results
+% are stored in one .mat file corresponding to one impulse response/condition.
+% To speed up computation, the Parallel Computing Toolbox of MATLAB is used,
+% as the computation of the ear signals is independent.
 %
-%   Usage: generate_earSignals(dataset_dir,export_dir,stimulus_file)
+%   Usage: 
+%   generate_earSignals(dataset_dir,export_dir,stimulus_file,stimulus_len)
 %
 %   Input parameters:
 %       dataset_dir     - path to data set directory
 %       export_dir      - path to directory to save the computation outcome
-%       stimulus_file   - path to either .wav or .mat file containing
-%                         stimulus signal
-%
+%       stimulus_file   - path to either .wav or .mat file containing stimulus
+%                         signal
+%       stimulus_len    - length to optionally truncate the stimulus signal to
 
 %% Set parameters and define paths/files
-%
 
 % Define paths
 ir_dir = fullfile(dataset_dir,'brs');
@@ -39,6 +41,7 @@ end
 if nargin < 4; stimulus_len = 1; end
 
 %% Load stimulus signal
+
 % Load either from .wav or .mat file
 if strcmp(stimulus_file_ext,'wav')
     [stimulus, fs] = audioread(stimulus_file);
@@ -53,7 +56,7 @@ else
 end
 
 %% Obtain ear signals
-%
+
 % Repeat for each brs file
 parfor i=1:num
     % Load ir signal

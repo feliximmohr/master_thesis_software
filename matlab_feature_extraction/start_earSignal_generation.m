@@ -1,17 +1,17 @@
-% Script to start generation of binaura ear signals by convolution of
-% stimulus signal with a set of binaural room impulse responses for
-% specified data sets.
+% Script to start generation of binaural ear signals by convolution of
+% stimulus signal with a set of binaural impulse responses for
+% specified data sets. By setting paths to multiple data sets, ear signals
+% for all of the specified sets are computed.
 
 clear
 close all
 clc
-
 addpath('tools')
 
 %% Set paths and files
 % Data set directory
-dataset_dir = {'../data_set/exp2',...
-               '../data_set/exp1'};
+dataset_dir = {'../data_set/exp1',...
+               '../data_set/exp2'};
            
 % Directory to export files to
 export_dir = {'../generated/exp1/earSignals',...

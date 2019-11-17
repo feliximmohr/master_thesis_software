@@ -1,4 +1,6 @@
-% Script to start target generation for specified data sets
+% Script to start target generation for specified data sets. Targets are
+% composed of the localization azimuth with respect to the head orientation for
+% all conditions.
 
 clear
 close all

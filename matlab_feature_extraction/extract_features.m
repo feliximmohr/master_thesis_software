@@ -2,18 +2,22 @@ function extract_features(requests,par,earSignal_dir,export_dir,trunc_idx,start_
 %EXTRACT_FEATURES uses the Two!Ears Auditory Front-End and its processors
 % to calculate binaural features, such as ILD, ITD and IC from binaural ear
 % signals and writes the computation results to files as specified.
-%   #TODO: extended documentation
 %
-%   Usage: extract_features(requests,par,trunc_idx,dataset_dir,export_dir,output_type)
+% Requires Two!Ears Auditory Model (Tested with version 1.5).
+% DOI: 10.5281/zenodo.1458420
+%
+%   Usage: extract_features(requests,par,earSignal_dir,export_dir,trunc_idx,start_idx,reformat_filename)
 %
 %   Input parameters:
-%       requests    - cell array containing string of requested feature
-%       par         - parameter structure for Two!Ears Auditory Front-End processor requests
-%       dataset_dir - path to data set directory
-%       export_dir  - path to directory to save the computation outcome
-%       trunc_idx   - index of last not truncated sample of each computed feature
-%       start _idx  - index of first sample
-% 
+%       requests          - cell array containing string of requested feature
+%       par               - parameter structure for Two!Ears Auditory Front-End
+%                           processor requests
+%       earSignal_dir     - path to ear signal directory
+%       export_dir        - path to directory to save the computation outcome
+%       trunc_idx         - index of last not truncated sample of each computed
+%                           feature
+%       start _idx        - index of first sample
+%       reformat_filename - boolean for optionally reformatting the filenames
 
 if nargin < 7
     reformat_filename = 0;

@@ -1,21 +1,26 @@
-% Script to create tubular data structure from existing files
-%TODO: extended documentation
+% Script to create tabular data structure from existing files in a huge
+% redundant format. Each row represents one sample for training, resulting in
+% 160 conditions * 360 deg * 10-100 repititions * 20 subjects rows. Turned out
+% to be too large and is thus impractical.
 
 clear
 close all
 clc
 addpath('tools');
 
-dataset_dir = {'/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/exp1/'};
-               %'../generated/exp2/'};
-%export_dir  =  '../generated/';
-export_dir  =  '/media/feliximmohr/B258-9BDE/calc_new/master_thesis_software/generated/database/';
+%% Set paths and files
+
+dataset_dir = {'../generated/exp1/',...
+               '../generated/exp2/'};
+           
+export_dir  =  '../generated/database/';
            
 % Define metadata
 % Listening positions
 x = [0.00; 0.50; 1.00; 0.00; 0.50; 1.00; 1.25;  0.00;  0.50;  1.00]*(-1);
 y = [0.75; 0.75; 0.75; 0.00; 0.00; 0.00; 0.00; -0.75; -0.75; -0.75];
 
+% SFS methods
 sfs_method = {
             'NFCHOA_M006'
             'NFCHOA_M013'
@@ -33,9 +38,12 @@ sfs_method = {
             'LWFS-VSS_r45'
             'WFS'                
                 };
+
+% Reproduction setup
 setup = {'circular_nls0056_dvs3.00'};          
 
 %% Processing
+
 T_all=table();
 % Do for each data set (exp1/exp2/...)
 for i=1:size(dataset_dir,1)
@@ -98,10 +106,11 @@ end
 
 % Create table consisting of metadata, features and targets
 T_meta = table(x_t,y_t,sfs_method_t,setup_t, 'VariableNames', variables_meta);
-T_data = array2table([ild_t,itd_t,ic_t,targets_t],'VariableNames',[variables_data, 'Localization_Azimuth']);
+T_data = array2table([ild_t,itd_t,ic_t,targets_t],'VariableNames',...
+    [variables_data, 'Localization_Azimuth']);
 T = [T_meta,T_data];
 
-%T_all = [T_all;T];
+T_all = [T_all;T];
 
 filename = strrep(features_files{j},'ild_itd_ic.mat','data');
 writetable(T,[export_dir,filename,'.csv'])
@@ -110,4 +119,4 @@ end
 end
 
 % Write table to file
-%writetable(T_all,'data_set.csv')
+writetable(T_all,'data_set.csv')

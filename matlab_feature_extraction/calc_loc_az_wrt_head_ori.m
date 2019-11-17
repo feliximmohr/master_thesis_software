@@ -1,12 +1,12 @@
 function calc_loc_az_wrt_head_ori(stats_dir,export_dir)
 %CALC_LOC_AZ_WRT_HEAD_ORI calculates the localization azimuth with respect 
-% to head orientation for all conditions and write results to csv file.
-%   #TODO: extended documentation
+% to head orientation for all conditions and writes results to csv file.
 %
 %   Usage: calc_loc_az_wrt_head_ori(stats_dir,export_dir)
 %
 %   Input parameters:
-%       stats_dir   - path to data set directory
+%       stats_dir   - path to stats directory containing the localisation
+%                     azimuth of the listening experiments
 %       export_dir  - path to directory to save the computation outcome
 % 
 

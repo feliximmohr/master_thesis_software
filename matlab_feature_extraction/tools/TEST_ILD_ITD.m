@@ -1,24 +1,19 @@
-%clear
-close all
-%clc
-
+% Script for quick testing and plotting of ILD, ITD and IC.
+% A set of ear signals need to be loaded manually.
+%
+% Code based on: 
+% https://github.com/TWOEARS/TwoEars/blob/master/AuditoryFrontEnd/test/DEMO_ILD.m
 
 %% LOAD SIGNAL
-% 
-% 
-% Audio path
-audioPath = fullfile(fileparts(mfilename('fullpath')),'Test_signals');
 
-% Load a signal
-%load([audioPath,filesep,'earSignals_brs_win-max-rE_ord-13_pos-1(-0.00x_0.75y)_corrected.mat']);
+% Manually load set of ear signals.
 
 % Create a data object based on the ear signals
 dObj = dataObject(earSignals(:,89:90),fs);
 
 
 %% PLACE REQUEST AND CONTROL PARAMETERS
-% 
-% 
+
 % Request interaural level differences (ILDs)
 requests = {'ild', 'itd', 'ic'};
 
@@ -46,8 +41,7 @@ par = genParStruct('fb_type',fb_type,'fb_lowFreqHz',fb_lowFreqHz,...
                
                
 %% PERFORM PROCESSING
-% 
-% 
+
 % Create a manager
 mObj = manager(dObj,requests,par);
 
@@ -56,8 +50,7 @@ mObj.processSignal();
 
 
 %% PLOT RESULTS
-% 
-% 
+
 % Plot the original ear signal
 dObj.plot([],[],'bGray',1,'decimateRatio',3,'bSignal',1);
 ylim([-1.25 1.25]);

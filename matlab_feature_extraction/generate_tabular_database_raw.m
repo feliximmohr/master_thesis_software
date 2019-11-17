@@ -1,21 +1,30 @@
-% Script to create tubular data structure from existing files
-%TODO: extended documentation
+% Script to create tabular data structure from existing files in a raw
+% format. That means the data is stored an a structure that avoids redundancy.
+% Features and targets are saved separately in .csv files. Additionally, a
+% global ID list is defined, associating a position/condition/subject
+% combination to each sample, that will later be generated with a python data
+% generator. To be able to reconstruct the position in the xy-plane from a
+% saved position ID and the SFS method and parametrisation from a condition
+% ID, position and condition reference tables are also contructed.
 
 clear
 close all
 clc
 addpath('tools');
 
-dataset_dir = {
-             '/media/feliximmohr/Storage/master_thesis/generated/exp1/'
-             '/media/feliximmohr/Storage/master_thesis/generated/exp2/'};
+%% Set paths and files
 
-export_dir = '/media/feliximmohr/Storage/master_thesis/generated/database/raw/';
+dataset_dir = {
+             '../generated/exp1/'
+             '../generated/exp2/'};
+
+export_dir = '../generated/database/raw/';
 
 % Define metadata
 % Listening positions
 x = [0.00; 0.50; 1.00; 0.00; 0.50; 1.00; 1.25;  0.00;  0.50;  1.00]*(-1);
 y = [0.75; 0.75; 0.75; 0.00; 0.00; 0.00; 0.00; -0.75; -0.75; -0.75];
+
 % SFS methods
 sfs_method = {
             'NFCHOA_M006'
@@ -34,8 +43,10 @@ sfs_method = {
             'LWFS-VSS_r45'
             'WFS'                
                 };
+            
 % Reproduction setup
 setup = {'circular_nls0056_dvs3.00'};
+
 % Number of subjects (listeners)
 n_subjects = 20;
 
