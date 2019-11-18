@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
+
 def plot_history(hist, val_hist, metric_str):
     """Plot train and validation history."""
     plt.plot(hist)
@@ -15,18 +16,22 @@ def plot_history(hist, val_hist, metric_str):
     plt.legend(['Train', 'Validation'], loc='upper left')
     plt.show()
     
+
 def plot_locaz_all(pred, y=None, l=False, title=None):
     """
-    Plot localization azimuth prediction for all positions and optionally also corresponding ground truth for comparison.
+    Plot localization azimuth prediction for all positions and
+    optionally also corresponding ground truth for comparison.
     
     Parameters
     ----------
     pred : list of lists or list of ndarrays
         List of predicted localization azimuth data for all positions.
     y : list of lists or list of ndarrays, optional
-        List of target or ground truth data for localization azimuth for all positions.
+        List of target or ground truth data for localization azimuth
+        for all positions.
     l : bool, optional
-        If True plot from -180<x<180 instead of 0<x<360. Defaults to False.
+        If True plot from -180<x<180 instead of 0<x<360.
+        Defaults to False.
     title : string, optional
         Figure title.
     """
@@ -39,19 +44,28 @@ def plot_locaz_all(pred, y=None, l=False, title=None):
         gs0 = gridspec.GridSpec(n_pos, 1, figure=fig)
         for i in range(n_pos):
             gs00 = gs0[i].subgridspec(1, 21)
-            _, _, _ = plot_locaz(pred[i], y[i], fig=fig, l=l, title='Position '+str(i), gs=(gs00[:,:9], gs00[:,10:19], gs00[:,20]))
+            _, _, _ = plot_locaz(pred[i], y[i], fig=fig, l=l,
+                                 title='Position '+str(i), gs=(gs00[:,:9],
+                                 gs00[:,10:19], gs00[:,20]))
     else:
         gs0 = gridspec.GridSpec(3, 4, figure=fig)
         for i in range(n_pos):
             gs00 = gs0[i].subgridspec(21, 21)
-            _, ax, _ = plot_locaz(pred[i], fig=fig, l=l, title='Position '+str(i), gs=(gs00[:20,:20], gs00[0,0], gs00[0,0]))
+            _, ax, _ = plot_locaz(pred[i], fig=fig, l=l,
+                                  title='Position '+str(i),
+                                  gs=(gs00[:20,:20], gs00[0,0], gs00[0,0]))
             ax.set_xlabel('')
             ax.set_ylabel('')
-            fig.legend(ax.get_children()[0:1],['predictions'],loc='upper right', bbox_to_anchor=(0.8, 0.3))
+            fig.legend(ax.get_children()[0:1],['predictions'],
+                       loc='upper right', bbox_to_anchor=(0.8, 0.3))
+    return fig
     
-def plot_locaz(pred, y=None, l=False, title=None, fig=None, gs=None, b=10, s=20):
+
+def plot_locaz(pred, y=None, l=False, title=None, fig=None, gs=None, b=10,
+               s=20):
     """
-    Plot localization azimuth prediction for one position and optionally also corresponding ground truth for comparison.
+    Plot localization azimuth prediction for one position and
+    optionally also corresponding ground truth for comparison.
     
     Parameters
     ----------
@@ -60,7 +74,8 @@ def plot_locaz(pred, y=None, l=False, title=None, fig=None, gs=None, b=10, s=20)
     y : list or ndarray, optional
         Target or ground truth data for localization azimuth.
     l : bool
-        If True plot from -180<x<180 instead of 0<x<360. Defaults to False.
+        If True plot from -180<x<180 instead of 0<x<360.
+        Defaults to False.
     title : string, optional
         Figure title.
     fig : Figure object, optional
@@ -96,7 +111,8 @@ def plot_locaz(pred, y=None, l=False, title=None, fig=None, gs=None, b=10, s=20)
         gs_yc = gs[2]
         gs_y = gs[1]
     
-    # number of values y for exactly one data point x; number of repitions * number of subjects
+    # number of values y for exactly one data point x;
+    # number of repitions * number of subjects
     n = b*s   
         
     # create subplots 
@@ -134,23 +150,26 @@ def plot_locaz(pred, y=None, l=False, title=None, fig=None, gs=None, b=10, s=20)
         ax_yc.scatter([0],[np.mean(y[:n])],marker='+',color='r')
     
     # add grid and lines
-    ax_p.grid(b=True, which='major', color='#999999', linestyle='-', alpha=0.2)
+    ax_p.grid(b=True, which='major', color='#999999', linestyle='-',
+              alpha=0.2)
     ax_p.plot([-500,500],[180,180],color='k', alpha=0.3)
     ax_p.plot([-500,500],[-180,-180],color='k',alpha=0.3)
     ax_p.plot([180,180],[-500,500],color='r', alpha=0.1)
     ax_p.plot([-180,-180],[-500,500],color='r', alpha=0.1)
     ax_p.scatter([0],[np.mean(pred[:n])],marker='+',color='r')
     if y is not None:
-        ax_y.grid(b=True, which='major', color='#999999', linestyle='-', alpha=0.2)
+        ax_y.grid(b=True, which='major', color='#999999', linestyle='-',
+                  alpha=0.2)
         ax_y.plot([-500,500],[180,180],color='k', alpha=0.3)
         ax_y.plot([-500,500],[-180,-180],color='k',alpha=0.3)
         ax_y.plot([180,180],[-500,500],color='r', alpha=0.1)
         ax_y.plot([-180,-180],[-500,500],color='r', alpha=0.1)
         ax_y.scatter([0],[np.mean(y[:n])],marker='+',color='r')
-        ax_yc.grid(b=True, which='major', color='#999999', linestyle='-', alpha=0.2)
+        ax_yc.grid(b=True, which='major', color='#999999', linestyle='-',
+                   alpha=0.2)
         ax_yc.set_xticklabels([])
-    
     return fig, ax_p, ax_y
+
 
 def get_model_info(filename):
     """
@@ -187,5 +206,4 @@ def get_model_info(filename):
         special = ' + '+special.split('-')[1]+'-'+special.split('-')[2]
     else:
         special = ' + '+special
-        
     return model, loss, tdata, special, bs, optim

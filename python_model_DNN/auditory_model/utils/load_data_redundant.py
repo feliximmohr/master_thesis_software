@@ -1,20 +1,23 @@
 """
-A python module that provides functions and classes to load data for training.
+A python module that provides functions and classes to load the
+redundant database for training. Remains untested for latest version.
 """
 
 import numpy as np
 import pandas as pd
 from keras.utils import Sequence
 from os.path import splitext
-
 from utils import get_metadata_from_filename
+
 
 class DG_redundant_single_rows(Sequence):
     """
-    Generates data for Keras. Based on a global ID list load radomized single rows of data from file ID + local row ID pairs.
-    VERY slow.
+    Generates data for Keras. Based on a global ID list load radomized
+    single rows of data from file ID + local row ID pairs. VERY slow.
     """
-    def __init__(self, list_IDs, data_dir, filelist, feature_label, target_label, n_rows=720000, batch_size=32, dim=96, shuffle=True):
+    def __init__(self, list_IDs, data_dir, filelist, feature_label,
+                 target_label, n_rows=720000, batch_size=32, dim=96,
+                 shuffle=True):
         """Initialization."""
         self.list_IDs = list_IDs
         self.data_dir = data_dir
@@ -35,14 +38,14 @@ class DG_redundant_single_rows(Sequence):
     def __getitem__(self, index):
         """Generate one batch of data."""
         # Generate indexes of the batch
-        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+        indexes = self.indexes[index*self.batch_size:(index+1)
+                               *self.batch_size]
 
         # Find list of IDs
         list_IDs_temp = [self.list_IDs[k] for k in indexes]
 
         # Generate data
         X, y = self.__data_generation(list_IDs_temp)
-
         return X, y
 
     def on_epoch_end(self):
@@ -84,13 +87,16 @@ class DG_redundant_single_rows(Sequence):
             y[i] = data[self.target_label].values
 
         return X, y
-    
+
+
 class DG_redundant_consec(Sequence):
     """
-    Based on a global ID list load radomized batches of consecutive rows of data from file ID + local row ID pairs.
-    Slow.
+    Based on a global ID list load radomized batches of consecutive
+    rows of data from file ID + local row ID pairs. Slow.
     """
-    def __init__(self, list_IDs, data_dir, filelist, feature_label, target_label, n_rows=720000, batch_size=32, dim=96, shuffle=True):
+    def __init__(self, list_IDs, data_dir, filelist, feature_label,
+                 target_label, n_rows=720000, batch_size=32, dim=96,
+                 shuffle=True):
         """Initialization."""
         self.list_IDs = list_IDs
         self.data_dir = data_dir
@@ -111,11 +117,11 @@ class DG_redundant_consec(Sequence):
     def __getitem__(self, index):
         """Generate one batch of data."""
         # Generate indexes of the batch
-        list_IDs_temp = self.list_IDs[index*self.batch_size:(index+1)*self.batch_size]
+        list_IDs_temp = self.list_IDs[index*self.batch_size:(index+1)
+                                      *self.batch_size]
 
         # Generate data
         X, y = self.__data_generation(list_IDs_temp)
-
         return X, y
 
     #def on_epoch_end(self):
@@ -144,34 +150,41 @@ class DG_redundant_consec(Sequence):
             # load data from HDF5 file
             if not multifile:
                 local_idx = local_idx.tolist()
-                data = pd.read_hdf(self.data_dir+self.filelist[file_idx[0]], where=local_idx)
+                data = pd.read_hdf(self.data_dir+self.filelist[file_idx[0]],
+                                   where=local_idx)
             else:
                 local_idx1 = local_idx[:multifile].tolist()
                 local_idx2 = local_idx[multifile:].tolist()
-                df1 = pd.read_hdf(self.data_dir+self.filelist[file_idx[0]], where=local_idx1)
-                df2 = pd.read_hdf(self.data_dir+self.filelist[file_idx[multifile]], where=local_idx2)
+                df1 = pd.read_hdf(self.data_dir+self.filelist[file_idx[0]],
+                                  where=local_idx1)
+                df2 = pd.read_hdf(self.data_dir
+                                  +self.filelist[file_idx[multifile]],
+                                  where=local_idx2)
                 data = pd.concat([df1, df2])
         else:
             # determine rows not to read
             local_rows = np.arange(self.n_rows,dtype='int32')
             skip_rows = np.delete(local_rows, local_idx)
             # load data from csv file
-            data = pd.read_csv(self.data_dir+self.filelist[file_idx[0]], skiprows=skip_rows)
+            data = pd.read_csv(self.data_dir+self.filelist[file_idx[0]],
+                               skiprows=skip_rows)
               
         # Store sample
         X = data[self.feature_label].values
 
         # Store targets
         y = data[self.target_label].values
-
         return X, y
-    
+
+
 class DG_redundant_single_table(Sequence):
     """
-    Based on a global ID list load radomized rows of data from single large table in single HDF5 file.
-    Might be slow?
+    Based on a global ID list load radomized rows of data from single
+    large table in single HDF5 file. Might be slow.
     """
-    def __init__(self, list_IDs, data_dir, filelist, feature_label, target_label, n_rows=720000, batch_size=32, dim=96, shuffle=True):
+    def __init__(self, list_IDs, data_dir, filelist, feature_label,
+                 target_label, n_rows=720000, batch_size=32, dim=96,
+                 shuffle=True):
         """Initialization."""
         self.list_IDs = list_IDs
         self.data_dir = data_dir
@@ -195,7 +208,6 @@ class DG_redundant_single_table(Sequence):
 
         # Generate data
         X, y = self.__data_generation(list_IDs_temp)
-
         return X, y
 
     def on_epoch_end(self):
@@ -220,32 +232,35 @@ class DG_redundant_single_table(Sequence):
 
         # Store targets
         y = data[self.target_label].values
-
         return X, y
+
 
 def get_ID_list(filelist, ignore_list, n_rows=[]):
     """
-    Generate IDs each corresponding to exactly one row/sample of an entire data set.
-    Returns list of numeric IDs. If specified, specific files and corresponding IDs can be ignored.
+    Generate IDs each corresponding to exactly one row/sample of an
+    entire data set. Returns list of numeric IDs. If specified,
+    specific files and corresponding IDs can be ignored.
     
     Parameters
     ----------
     filelist : list
         List of strings containing the filenames.
     ignore_list : list
-        List containing substrings of filenames to specify the files to be ignored.
-        If an element in this list matches a substring in a filename, the corresponding file will be ignored.
+        List containing substrings of filenames to specify the files to
+        be ignored. If an element in this list matches a substring in a
+        filename, the corresponding file will be ignored.
     n_rows : list, optional
-        Number of rows per file. If not specified, the number of rows will be
-        determined by the first file in the sorted filelist.
+        Number of rows per file. If not specified, the number of rows
+        will be determined by the first file in the sorted filelist.
     
         
     Returns
     -------
     ID_list : list
-        List of numeric IDs, each corresponding to exactly one row of the complete data set.
-        If specific files are ignored (corresponding to specific conditions/metadata),
-        the corresponding row IDs are missing in this list.
+        List of numeric IDs, each corresponding to exactly one row of
+        the complete data set. If specific files are ignored
+        (corresponding to specific conditions/metadata), the
+        corresponding row IDs are missing in this list.
     """
     
     # sort filelist
@@ -272,5 +287,4 @@ def get_ID_list(filelist, ignore_list, n_rows=[]):
         # concatenate IDs for each file
         if not ignore:
             ID_list = np.concatenate((ID_list, np.arange(start=start_idx, stop=stop_idx, dtype='int32')))
-              
     return ID_list, n_rows

@@ -6,12 +6,36 @@ import numpy as np
 import pandas as pd
 from keras.utils import Sequence
 
+
 class DataGenerator_raw(Sequence):
     """
-    Generates data for Keras.
-    TODO
+    A class for a data generator for Keras sequential models. Creates
+    the training samples in batches on the fly from the non-reduntant
+    (raw) database.    
+
+    Attributes
+    ----------
+    list_IDs : numpy.ndarray
+        A one-dimensional array containing global IDs or sample IDs.
+    feature_data : numpy.ndarray
+        Two-dimensional array of feature data from the non-redundant
+        (raw) database.
+    target_data : numpy.ndarray
+        Two-dimensional array of target data from the non-redundant
+        (raw) database.
+    batch_size : int, optional
+        Batch size.
+    dim : int, optional
+        Input dimension or number of features. Defaults to 96.
+    shuffle : bool, optional
+        Optionally shuffle the data for each epoch.
+    n_frames : int, optional
+        Number of frames/repititions in feature computation.
+    n_angles : int, optional
+        Number of angles. Defaults to 360.
     """
-    def __init__(self, list_IDs, feature_data, target_data, batch_size=32, dim=96, shuffle=True, n_frames=100, n_angles=360):
+    def __init__(self, list_IDs, feature_data, target_data, batch_size=32,
+                 dim=96, shuffle=True, n_frames=100, n_angles=360):
         """Initialization."""
         self.list_IDs = list_IDs
         self.feature_data = feature_data
@@ -19,11 +43,9 @@ class DataGenerator_raw(Sequence):
         self.batch_size = batch_size
         self.dim = dim
         self.shuffle = shuffle
-        
         self.n_subjects = target_data.shape[1]
         self.n_frames = n_frames
         self.n_angles = n_angles
-        
         self.on_epoch_end() #trigger once at beginning
 
     def __len__(self):
@@ -33,14 +55,14 @@ class DataGenerator_raw(Sequence):
     def __getitem__(self, index):
         """Generate one batch of data."""
         # Generate indexes of the batch
-        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+        indexes = self.indexes[index*self.batch_size:(index+1)
+                               *self.batch_size]
 
         # Find list of IDs
         list_IDs_temp = [self.list_IDs[k] for k in indexes]
 
         # Generate data
         X, y = self.__data_generation(list_IDs_temp)
-
         return X, y
 
     def on_epoch_end(self):
@@ -59,8 +81,10 @@ class DataGenerator_raw(Sequence):
         y = np.empty((self.batch_size))
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
-            feature_idx = np.floor(ID/self.n_subjects) #one feature row for all 20 subjects 0...19 -> f=0
-            target_idx = np.floor(ID/(self.n_subjects*self.n_frames)) #one target row for 100 frames for each subject 0...1999 -> t=0
+            # one feature row for all 20 subjects 0...19 -> f=0
+            feature_idx = np.floor(ID/self.n_subjects)
+            # one target row for 100 frames for each subject 0...1999 -> t=0
+            target_idx = np.floor(ID/(self.n_subjects*self.n_frames))
             subject_idx = ID - feature_idx*self.n_subjects 
            
             # Store sample
@@ -68,13 +92,13 @@ class DataGenerator_raw(Sequence):
 
             # Store targets
             y[i] = self.target_data[int(target_idx),int(subject_idx)]
-            
         return X, y
+
 
 def load_raw_ft_h5(filename, key_f='feature_data', key_t='target_data'):
     """
-    Load raw feature and target data from single HDF5 file specified by filename and key.
-    If no keys provided, use default keys.
+    Load raw feature and target data from single HDF5 file specified by
+    filename and key. If no keys provided, use default keys.
     
     Parameters
     ----------
@@ -99,10 +123,13 @@ def load_raw_ft_h5(filename, key_f='feature_data', key_t='target_data'):
     f_column_labels = feature_df.columns.tolist()
     return feature_df, target_df, f_column_labels
 
-def load_raw_IDs_h5(filename, key_ID='ID_reference_table', key_p='position_table', key_c='condition_table', key_fp='feature_par'):
+
+def load_raw_IDs_h5(filename, key_ID='ID_reference_table',
+                    key_p='position_table', key_c='condition_table',
+                    key_fp='feature_par'):
     """
-    Load raw metadata from single HDF5 file specified by filename and key.
-    If no keys provided, use default keys.
+    Load raw metadata from single HDF5 file specified by filename and
+    key. If no keys provided, use default keys.
     
     Parameters
     ----------
@@ -128,16 +155,19 @@ def load_raw_IDs_h5(filename, key_ID='ID_reference_table', key_p='position_table
     par_df : pandas DataFrame object
         DataFrame containing feature parameter data.
     """
+
     ID_ref_df = pd.read_hdf(filename, key=key_ID)#.reset_index(drop=True)
     pos_table_df = pd.read_hdf(filename, key=key_p)
     cond_table_df = pd.read_hdf(filename, key=key_c)
     par_df = pd.read_hdf(filename, key=key_fp)
     return ID_ref_df, pos_table_df, cond_table_df, par_df
 
-def load_raw_all_h5(filename, key_f=None, key_t=None, key_ID=None, key_p=None, key_c=None, key_fp=None):
+
+def load_raw_all_h5(filename, key_f=None, key_t=None, key_ID=None, key_p=None,
+                    key_c=None, key_fp=None):
     """
-    Load complete raw data from single HDF5 file specified by filename and key.
-    If no keys provided, use default keys.
+    Load complete raw data from single HDF5 file specified by filename
+    and key. If no keys provided, use default keys.
     
     Parameters
     ----------
@@ -171,6 +201,7 @@ def load_raw_all_h5(filename, key_f=None, key_t=None, key_ID=None, key_p=None, k
     par_df : pandas DataFrame object
         DataFrame containing feature parameter data.
     """
+
     feature_df, target_df, _ = load_raw_ft_h5(filename)
     ID_ref_df, pos_table_df, cond_table_df, par_df = load_raw_IDs_h5(filename)
     return feature_df, target_df, ID_ref_df, pos_table_df, cond_table_df, par_df

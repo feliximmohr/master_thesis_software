@@ -5,6 +5,8 @@ Various utility functions.
 import json
 import sys
 from os import walk
+from numpy import savetxt
+
 
 def get_filelist(data_dir):
     """Load filelist and return sorted version of it."""
@@ -13,6 +15,7 @@ def get_filelist(data_dir):
         filelist.extend(filenames)
     filelist.sort()
     return filelist
+
 
 def get_metadata_from_filename(filename):
     """
@@ -24,18 +27,18 @@ def get_metadata_from_filename(filename):
     
     Parameters
     ----------
-    filename : string
+    filename : str
         Name of a file containing some metadata information.
         
     Returns
     -------
-    method : string
+    method : str
         SFS method obtained from file name.
-    setup : string
+    setup : str
         Reproduction setup as obtained from filename.
-    position : string
+    position : str
         Position identifier as obtained from filename.
-    dataset_name : string
+    dataset_name : str
         Name of original data set as obtained from filename.
     """
     metadata = filename.split('_')
@@ -44,8 +47,8 @@ def get_metadata_from_filename(filename):
     method = metadata[1] + '_' + metadata[3]
     setup = metadata[2]
     position = metadata[4]
-    
     return method, setup, position, dataset_name
+
 
 def open_json(dir, filename):
     """Open json file and return its contents."""
@@ -53,5 +56,6 @@ def open_json(dir, filename):
         content = json.load(json_file)
     return content
 
+
 def write_var_stdout(x):
-    np.savetxt(sys.stdout, x)
+    savetxt(sys.stdout, x)
